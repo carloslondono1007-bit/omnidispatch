@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OmniDispatch iOS Pro - Insurance & Vehicle Hub</title>
+    <style>
+        :root {
+            --bg-dark: #000000;
+            --surface-dark: #1c1c1e;
+            --surface-card: #2c2c2e;
+            --accent-green: #30d158;
+            --accent-blue: #0a84ff;
+            --accent-orange: #ff9f0a;
+            --accent-red: #ff453a;
+            --text-primary: #ffffff;
+            --text-secondary: #8e8e93;
+            --border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background-color: #0f1015;
+            background-image: radial-gradient(circle at 50% 0%, #1f2937 0%, #0b0f17 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        /* iPhone 15 Pro Hardware Bezel */
+        .iphone-frame {
+            position: relative;
+            width: 412px;
+            height: 860px;
+            background: var(--bg-dark);
+            border-radius: 54px;
+            box-shadow: 
+                0 0 0 12px #28282d,
+                0 0 0 15px #3a3a3f,
+                0 25px 60px rgba(0, 0, 0, 0.8),
+                0 0 40px rgba(10, 132, 255, 0.25);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .iphone-frame::before {
+            content: '';
+            position: absolute;
+            top: 80px;
+            left: -15px;
+            width: 4px;
+            height: 28px;
+            background: #3a3a3f;
+            border-radius: 2px 0 0 2px;
+        }
+        .iphone-frame::after {
+            content: '';
+            position: absolute;
+            top: 130px;
+            left: -15px;
+            width: 4px;
+            height: 48px;
+            background: #3a3a3f;
+            border-radius: 2px 0 0 2px;
+        }
+
+        /* iOS Status Bar */
+        .status-bar {
+            height: 48px;
+            padding: 0 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+            font-weight: 600;
+            background: transparent;
+            z-index: 100;
+            flex-shrink: 0;
+        }
+
+        .status-bar .time {
+            letter-spacing: -0.3px;
+        }
+
+        .status-icons {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            font-size: 12px;
+        }
+
+        /* Dynamic Island */
+        .dynamic-island {
+            position: absolute;
+            top: 11px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 32px;
+            background: #000000;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 10px;
+            z-index: 101;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            cursor: pointer;
+        }
+
+        .dynamic-island.expanded {
+            width: 340px;
+            height: 75px;
+            border-radius: 24px;
+            padding: 12px 16px;
+        }
+
+        .di-camera {
+            width: 11px;
+            height: 11px;
+            background: #111;
+            border-radius: 50%;
+            border: 1px solid #222;
+        }
+
+        .di-content {
+            display: none;
+            width: 100%;
+            font-size: 12px;
+        }
+
+        .dynamic-island.expanded .di-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* App Viewport */
+        .app-screen {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+            background: #000;
+        }
+
+        /* Header Navigation */
+        .app-header {
+            padding: 12px 20px 8px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(28, 28, 30, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-color);
+            z-index: 10;
+        }
+
+        .app-title h1 {
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .app-title span {
+            font-size: 11px;
+            color: var(--accent-green);
+            font-weight: 500;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        /* Mode Toggle Switch */
+        .mode-toggle {
+            background: var(--surface-card);
+            border-radius: 20px;
+            padding: 3px;
+            display: flex;
+            border: 1px solid var(--border-color);
+        }
+
+        .mode-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 11px;
+            font-weight: 600;
+            padding: 5px 10px;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .mode-btn.active {
+            background: var(--accent-blue);
+            color: white;
+            box-shadow: 0 2px 8px rgba(10, 132, 255, 0.4);
+        }
+
+        /* Main Content Tabs Container */
+        .tab-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Feed Cards */
+        .feed-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .feed-header h2 {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .dispatch-card {
+            background: var(--surface-card);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border: 1px solid var(--border-color);
+            position: relative;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .dispatch-card:hover {
+            border-color: var(--accent-blue);
+            transform: translateY(-2px);
+        }
+
+        .card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+
+        .brand-badge {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-mcd { background: #ffbc0d; color: #000; }
+        .badge-bk { background: #d62300; color: #fff; }
+        .badge-amazon { background: #ff9900; color: #000; }
+        .badge-fedex { background: #4d148c; color: #fff; }
+        .badge-dd { background: #eb1700; color: #fff; }
+        .badge-uber { background: #fff; color: #000; }
+        .badge-target { background: #cc0000; color: #fff; }
+
+        .payout {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--accent-green);
+        }
+
+        .card-details {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+            line-height: 1.4;
+        }
+
+        .card-details strong {
+            color: var(--text-primary);
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-accept {
+            flex: 1;
+            background: var(--accent-green);
+            color: #000;
+            border: none;
+            padding: 10px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .btn-accept:hover {
+            opacity: 0.9;
+        }
+
+        .map-options-group {
+            display: flex;
+            gap: 6px;
+        }
+
+        .btn-map-apple {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border: 1px solid var(--border-color);
+            padding: 10px 12px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .btn-map-google {
+            background: rgba(66, 133, 244, 0.2);
+            color: #4285f4;
+            border: 1px solid rgba(66, 133, 244, 0.4);
+            padding: 10px 12px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        /* Profile & Settings Section */
+        .profile-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding-bottom: 20px;
+        }
+
+        .profile-card {
+            background: var(--surface-card);
+            border-radius: 16px;
+            padding: 16px;
+            border: 1px solid var(--border-color);
+        }
+
+        .profile-card h3 {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--accent-blue);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .form-group {
+            margin-bottom: 10px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            background: var(--bg-dark);
+            border: 1px solid var(--border-color);
+            padding: 9px 12px;
+            border-radius: 10px;
+            color: white;
+            font-size: 13px;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+        }
+
+        .btn-save {
+            width: 100%;
+            background: var(--accent-blue);
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            margin-top: 6px;
+        }
+
+        /* License & Insurance Badges */
+        .license-dropzone {
+            border: 2px dashed var(--border-color);
+            border-radius: 12px;
+            padding: 14px;
+            text-align: center;
+            background: var(--bg-dark);
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+
+        .license-dropzone:hover {
+            border-color: var(--accent-blue);
+        }
+
+        .license-preview-container {
+            margin-top: 10px;
+            position: relative;
+            border-radius: 10px;
+            overflow: hidden;
+            display: none;
+            border: 1px solid var(--border-color);
+            max-height: 150px;
+        }
+
+        .license-preview-container img {
+            width: 100%;
+            height: auto;
+            display: block;
+            object-fit: cover;
+        }
+
+        .badges-row {
+            display: flex;
+            gap: 6px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .badge-verified {
+            background: rgba(48, 209, 88, 0.15);
+            color: var(--accent-green);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .badge-expiry {
+            background: rgba(255, 159, 10, 0.15);
+            color: var(--accent-orange);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* Analytics Dashboard */
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .stat-card {
+            background: var(--surface-card);
+            padding: 14px;
+            border-radius: 14px;
+            border: 1px solid var(--border-color);
+        }
+
+        .stat-card h3 {
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-weight: 500;
+            margin-bottom: 6px;
+        }
+
+        .stat-card .value {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .sync-status {
+            background: rgba(48, 209, 88, 0.1);
+            border: 1px solid rgba(48, 209, 88, 0.3);
+            border-radius: 14px;
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            margin-bottom: 16px;
+        }
+
+        .sync-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--accent-green);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--accent-green);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.95); opacity: 0.8; }
+            50% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(0.95); opacity: 0.8; }
+        }
+
+        /* iOS Tab Bar */
+        .tab-bar {
+            height: 70px;
+            background: rgba(28, 28, 30, 0.9);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding-bottom: 15px;
+            flex-shrink: 0;
+            z-index: 10;
+        }
+
+        .tab-item {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 10px;
+            font-weight: 500;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .tab-item svg {
+            width: 22px;
+            height: 22px;
+            fill: currentColor;
+        }
+
+        .tab-item.active {
+            color: var(--accent-blue);
+        }
+
+        /* Toast notification */
+        .toast {
+            position: absolute;
+            bottom: 85px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: rgba(48, 209, 88, 0.9);
+            color: #000;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 200;
+            pointer-events: none;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="iphone-frame">
+        <!-- Dynamic Island -->
+        <div class="dynamic-island" id="dynamicIsland" onclick="toggleIsland()">
+            <div class="di-camera"></div>
+            <div class="di-content">
+                <span style="color: var(--accent-green); font-weight: 600;">● Active Driver</span>
+                <span id="di-eta" style="color: var(--text-secondary);">Carlos L. • Insured & Verified</span>
+            </div>
+            <div style="width: 8px; height: 8px; background: var(--accent-green); border-radius: 50%;"></div>
+        </div>
+
+        <!-- Status Bar -->
+        <div class="status-bar">
+            <span class="time" id="clock">9:41</span>
+            <div class="status-icons">
+                <span>5G</span>
+                <span>🔋 100%</span>
+            </div>
+        </div>
+
+        <!-- App Screen Viewport -->
+        <div class="app-screen">
+            <!-- Header -->
+            <div class="app-header">
+                <div class="app-title">
+                    <h1>OmniDispatch</h1>
+                    <span id="mode-indicator">🚗 Vehicle Mode Active</span>
+                </div>
+                <div class="header-actions">
+                    <div class="mode-toggle">
+                        <button class="mode-btn active" onclick="setMode('driving', this)">Drive</button>
+                        <button class="mode-btn" onclick="setMode('walking', this)">Walk</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 1: Dispatch Feed -->
+            <div id="tab-feed" class="tab-content active">
+                <div class="feed-header">
+                    <h2>Live Dispatch Feed</h2>
+                    <span style="font-size: 11px; color: var(--accent-green);">7 Services Online</span>
+                </div>
+
+                <div id="feed-list"></div>
+            </div>
+
+            <!-- Tab 2: User Profile, Info, Car, Banking & Insurance Hub -->
+            <div id="tab-profile" class="tab-content">
+                <div class="feed-header">
+                    <h2>Driver & Account Hub</h2>
+                    <span style="font-size: 11px; color: var(--accent-green);">Synced</span>
+                </div>
+
+                <div class="profile-container">
+                    <!-- Driver License Verification Card -->
+                    <div class="profile-card">
+                        <h3>🆔 Driver License Verification</h3>
+                        <div class="license-dropzone" onclick="document.getElementById('licenseFileInput').click()">
+                            <p style="font-size: 12px; color: var(--text-primary); font-weight: 500;">📷 Tap to Upload Driver's License</p>
+                            <p style="font-size: 10px; color: var(--text-secondary); margin-top: 2px;">Supports JPG, PNG (Front ID)</p>
+                            <input type="file" id="licenseFileInput" accept="image/*" style="display: none;" onchange="handleLicenseUpload(event)">
+                        </div>
+
+                        <div class="license-preview-container" id="licensePreviewBox">
+                            <img id="licensePreviewImg" src="" alt="Driver License Preview">
+                        </div>
+
+                        <div class="badges-row" id="licenseBadgesArea" style="display: none;">
+                            <span class="badge-verified">✓ Verified ID</span>
+                            <span class="badge-expiry" id="expiryBadge">⏳ Expires: 11/2028</span>
+                        </div>
+                    </div>
+
+                    <!-- Vehicle & Insurance Policy Card -->
+                    <div class="profile-card">
+                        <h3>🚗 Vehicle & Insurance Policy</h3>
+                        <div class="form-group">
+                            <label>Vehicle Make & Model</label>
+                            <input type="text" class="form-control" id="v-model" value="Toyota Prius Hybrid">
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                            <div class="form-group">
+                                <label>Year</label>
+                                <input type="text" class="form-control" id="v-year" value="2023">
+                            </div>
+                            <div class="form-group">
+                                <label>License Plate</label>
+                                <input type="text" class="form-control" id="v-plate" value="NY-OMN19">
+                            </div>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 4px;">
+                            <div class="form-group">
+                                <label>Insurance Provider</label>
+                                <input type="text" class="form-control" id="v-insurer" value="GEICO">
+                            </div>
+                            <div class="form-group">
+                                <label>Policy Expiry</label>
+                                <input type="text" class="form-control" id="v-ins-expiry" value="08/2027">
+                            </div>
+                        </div>
+                        <div class="badges-row">
+                            <span class="badge-verified">🛡️ Policy Active</span>
+                            <span class="badge-expiry" id="insExpiryBadge">⏳ Ins. Expires: 08/2027</span>
+                        </div>
+                        <button class="btn-save" onclick="saveVehicleInfo()">Save Vehicle & Insurance</button>
+                    </div>
+
+                    <!-- Personal Info Card -->
+                    <div class="profile-card">
+                        <h3>👤 Personal Info</h3>
+                        <div class="form-group">
+                            <label>Full Legal Name</label>
+                            <input type="text" class="form-control" id="p-name" value="Carlos Andres Londono Castano">
+                        </div>
+                        <div class="form-group">
+                            <label>Email Address</label>
+                            <input type="email" class="form-control" id="p-email" value="carlos@omni.dispatch">
+                        </div>
+                        <div class="form-group">
+                            <label>Phone Number</label>
+                            <input type="text" class="form-control" id="p-phone" value="(914) 555-0198">
+                        </div>
+                        <button class="btn-save" onclick="saveProfileInfo()">Save Info</button>
+                    </div>
+
+                    <!-- Banking & Payout Card -->
+                    <div class="profile-card">
+                        <h3>💳 Banking & Payout Account</h3>
+                        <div class="form-group">
+                            <label>Bank Name</label>
+                            <input type="text" class="form-control" id="b-bank" value="M&T Bank">
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                            <div class="form-group">
+                                <label>Routing Number</label>
+                                <input type="password" class="form-control" id="b-routing" value="••••••••21">
+                            </div>
+                            <div class="form-group">
+                                <label>Account Number</label>
+                                <input type="password" class="form-control" id="b-account" value="••••••••8841">
+                            </div>
+                        </div>
+                        <button class="btn-save" onclick="saveBankingInfo()">Save Banking</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 3: Earnings & Analytics Dashboard -->
+            <div id="tab-analytics" class="tab-content">
+                <div class="sync-status">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <div class="sync-dot"></div>
+                        <span>Google Sheets Sync Active</span>
+                    </div>
+                    <span style="font-size: 11px; color: var(--text-secondary);" id="sync-time">Just now</span>
+                </div>
+
+                <!-- Shift Reset Control Card -->
+                <div class="stat-card" style="margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; background: rgba(255, 69, 58, 0.08); border-color: rgba(255, 69, 58, 0.3);">
+                    <div>
+                        <h3 style="color: var(--text-primary); margin-bottom: 2px;">Active Shift Session</h3>
+                        <p style="font-size: 11px; color: var(--text-secondary);">Clear totals & start fresh</p>
+                    </div>
+                    <button onclick="resetShift()" style="background: rgba(255, 69, 58, 0.2); color: var(--accent-red); border: 1px solid rgba(255, 69, 58, 0.4); padding: 7px 10px; border-radius: 8px; font-weight: 600; font-size: 11px; cursor: pointer;">Reset Shift</button>
+                </div>
+
+                <!-- Daily Goal Progress Card -->
+                <div class="stat-card" style="margin-bottom: 14px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <h3>Daily Goal Tracker</h3>
+                        <span style="font-size: 12px; font-weight: 700; color: var(--accent-green);" id="goal-percentage">99%</span>
+                    </div>
+                    <div style="width: 100%; background: var(--bg-dark); height: 8px; border-radius: 4px; overflow: hidden; border: 1px solid var(--border-color);">
+                        <div id="goal-progress-bar" style="width: 99%; height: 100%; background: linear-gradient(90deg, var(--accent-blue), var(--accent-green)); border-radius: 4px; transition: width 0.4s ease;"></div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-top: 6px; font-size: 11px; color: var(--text-secondary);">
+                        <span id="current-earned-label">$248.50 Earned</span>
+                        <span id="target-label">Target: $250.00</span>
+                    </div>
+                </div>
+
+                <div class="analytics-grid">
+                    <div class="stat-card">
+                        <h3>Gross Daily Payout</h3>
+                        <div class="value" style="color: var(--accent-green);" id="stat-payout">$248.50</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Completed Deliveries</h3>
+                        <div class="value" id="stat-completed">14</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Active Fleet Brands</h3>
+                        <div class="value" style="color: var(--accent-blue);">7 Active</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Avg. Hourly Rate</h3>
+                        <div class="value" style="color: var(--accent-orange);">$32.10</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 4: Merchant Request Portal -->
+            <div id="tab-merchant" class="tab-content">
+                <div class="feed-header">
+                    <h2>Merchant Request Portal</h2>
+                </div>
+                <div class="merchant-form">
+                    <div class="form-group">
+                        <label>Business Name</label>
+                        <input type="text" class="form-control" id="m-name" placeholder="e.g., Joe's Artisan Bakery">
+                    </div>
+                    <div class="form-group">
+                        <label>Service / Dispatch Type</label>
+                        <select class="form-control" id="m-type">
+                            <option>Food & Beverage Express</option>
+                            <option>Retail Same-Day Delivery</option>
+                            <option>Warehouse Freight / Pallet</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Estimated Payout ($)</label>
+                        <input type="number" class="form-control" id="m-payout" placeholder="24.50">
+                    </div>
+                    <div class="form-group">
+                        <label>Dropoff Destination</label>
+                        <input type="text" class="form-control" id="m-dest" placeholder="e.g., 742 Evergreen Terrace">
+                    </div>
+                    <button class="btn-submit" onclick="submitMerchantRequest()">Submit to Google Sheets</button>
+                </div>
+            </div>
+
+            <!-- iOS Tab Bar -->
+            <div class="tab-bar">
+                <button class="tab-item active" onclick="switchTab('feed', this)">
+                    <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+                    Dispatch
+                </button>
+                <button class="tab-item" onclick="switchTab('profile', this)">
+                    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
+                    Profile
+                </button>
+                <button class="tab-item" onclick="switchTab('analytics', this)">
+                    <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
+                    Earnings
+                </button>
+                <button class="tab-item" onclick="switchTab('merchant', this)">
+                    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                    Merchant
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">Dispatch Accepted & Logged!</div>
+
+    <script>
+        let DAILY_TARGET = parseFloat(localStorage.getItem('omni_daily_target')) || 250.00;
+        let persistedPayout = parseFloat(localStorage.getItem('omni_total_payout')) || 248.50;
+        let persistedCompleted = parseInt(localStorage.getItem('omni_completed_count')) || 14;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('stat-payout').innerText = '$' + persistedPayout.toFixed(2);
+            document.getElementById('stat-completed').innerText = persistedCompleted;
+            updateEarningsProgress(persistedPayout);
+            loadProfileData();
+        });
+
+        setInterval(() => {
+            const now = new Date();
+            let hours = now.getHours();
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            document.getElementById('clock').innerText = `${hours}:${minutes}`;
+        }, 1000);
+
+        function toggleIsland() {
+            document.getElementById('dynamicIsland').classList.toggle('expanded');
+        }
+
+        const dispatches = [
+            { id: 1, brand: 'McDonald\'s', badge: 'badge-mcd', payout: '$18.50', distance: '1.2 mi', eta: '6 min', address: 'Main St & 5th Ave' },
+            { id: 2, brand: 'Amazon Flex', badge: 'badge-amazon', payout: '$42.00', distance: '4.8 mi', eta: '18 min', address: 'Logistics Park Blvd' },
+            { id: 3, brand: 'DoorDash', badge: 'badge-dd', payout: '$22.75', distance: '2.1 mi', eta: '9 min', address: 'Downtown Commercial Plaza' },
+            { id: 4, brand: 'FedEx Express', badge: 'badge-fedex', payout: '$58.00', distance: '7.5 mi', eta: '24 min', address: 'Airport Cargo Terminal B' },
+            { id: 5, brand: 'Burger King', badge: 'badge-bk', payout: '$14.25', distance: '0.8 mi', eta: '4 min', address: 'Westchester Ave' },
+            { id: 6, brand: 'Uber Connect', badge: 'badge-uber', payout: '$31.00', distance: '3.4 mi', eta: '12 min', address: 'Cross County Parkway' },
+            { id: 7, brand: 'Target Drive Up', badge: 'badge-target', payout: '$19.00', distance: '1.5 mi', eta: '7 min', address: 'Retail Center Hub' }
+        ];
+
+        let currentMode = 'driving';
+
+        function renderFeed() {
+            const list = document.getElementById('feed-list');
+            list.innerHTML = '';
+            dispatches.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'dispatch-card';
+                card.innerHTML = `
+                    <div class="card-top">
+                        <span class="brand-badge ${item.badge}">${item.brand}</span>
+                        <span class="payout">${item.payout}</span>
+                    </div>
+                    <div class="card-details">
+                        Distance: <strong>${item.distance}</strong> • ETA: <strong>${item.eta}</strong><br>
+                        Location: <strong>${item.address}</strong>
+                    </div>
+                    <div class="card-actions">
+                        <button class="btn-accept" onclick="acceptDispatch('${item.brand}', '${item.payout}')">One-Tap Accept</button>
+                        <div class="map-options-group">
+                            <button class="btn-map-apple" onclick="launchNavigation('apple', '${item.address}')">Apple</button>
+                            <button class="btn-map-google" onclick="launchNavigation('google', '${item.address}')">Google</button>
+                        </div>
+                    </div>
+                `;
+                list.appendChild(card);
+            });
+        }
+        renderFeed();
+
+        function launchNavigation(provider, destination) {
+            const encodedDest = encodeURIComponent(destination);
+            let url = provider === 'apple' 
+                ? `https://maps.apple.com/?daddr=${encodedDest}&dirflg=${currentMode === 'walking' ? 'w' : 'd'}`
+                : `https://www.google.com/maps/dir/?api=1&destination=${encodedDest}&travelmode=${currentMode === 'walking' ? 'walking' : 'driving'}`;
+            window.open(url, '_blank');
+            showToast(`Launching ${provider === 'apple' ? 'Apple' : 'Google'} Maps...`);
+        }
+
+        function setMode(mode, btn) {
+            currentMode = mode;
+            document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById('mode-indicator').innerText = mode === 'driving' ? '🚗 Vehicle Mode Active' : '🚶 Walking Mode Active';
+            showToast(mode === 'driving' ? 'Vehicle Routing Selected' : 'Walking Routing Selected');
+        }
+
+        function switchTab(tabId, btn) {
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+            document.getElementById('tab-' + tabId).classList.add('active');
+            btn.classList.add('active');
+        }
+
+        /* License Upload Handler */
+        function handleLicenseUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const base64Img = e.target.result;
+                    localStorage.setItem('driver_license_img', base64Img);
+                    
+                    const expiryDate = new Date();
+                    expiryDate.setFullYear(expiryDate.getFullYear() + 2);
+                    const expiryStr = expiryDate.toLocaleDateString('en-US', { month: '2-digit', year: 'numeric' });
+                    localStorage.setItem('driver_license_expiry', expiryStr);
+
+                    displayLicensePreview(base64Img, expiryStr);
+                    showToast('Driver license uploaded & verified!');
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function displayLicensePreview(imgSrc, expiryStr) {
+            const previewBox = document.getElementById('licensePreviewBox');
+            const previewImg = document.getElementById('licensePreviewImg');
+            const badgesArea = document.getElementById('licenseBadgesArea');
+            const expiryBadge = document.getElementById('expiryBadge');
+            
+            previewImg.src = imgSrc;
+            previewBox.style.display = 'block';
+            badgesArea.style.display = 'flex';
+            expiryBadge.innerText = `⏳ Expires: ${expiryStr}`;
+        }
+
+        /* Save Profile, Vehicle & Insurance Info */
+        function saveProfileInfo() {
+            localStorage.setItem('p_name', document.getElementById('p-name').value);
+            localStorage.setItem('p_email', document.getElementById('p-email').value);
+            localStorage.setItem('p_phone', document.getElementById('p-phone').value);
+            showToast('Personal info saved successfully!');
+        }
+
+        function saveVehicleInfo() {
+            const model = document.getElementById('v-model').value;
+            const year = document.getElementById('v-year').value;
+            const plate = document.getElementById('v-plate').value;
+            const insurer = document.getElementById('v-insurer').value;
+            const insExpiry = document.getElementById('v-ins-expiry').value;
+
+            localStorage.setItem('v_model', model);
+            localStorage.setItem('v_year', year);
+            localStorage.setItem('v_plate', plate);
+            localStorage.setItem('v_insurer', insurer);
+            localStorage.setItem('v_ins_expiry', insExpiry);
+
+            document.getElementById('insExpiryBadge').innerText = `⏳ Ins. Expires: ${insExpiry}`;
+            showToast('Vehicle & insurance policy updated!');
+        }
+
+        function saveBankingInfo() {
+            localStorage.setItem('b_bank', document.getElementById('b-bank').value);
+            localStorage.setItem('b_routing', document.getElementById('b-routing').value);
+            localStorage.setItem('b_account', document.getElementById('b-account').value);
+            showToast('Banking details securely saved!');
+        }
+
+        function loadProfileData() {
+            if(localStorage.getItem('p_name')) document.getElementById('p-name').value = localStorage.getItem('p_name');
+            if(localStorage.getItem('p_email')) document.getElementById('p-email').value = localStorage.getItem('p_email');
+            if(localStorage.getItem('p_phone')) document.getElementById('p-phone').value = localStorage.getItem('p_phone');
+            
+            if(localStorage.getItem('v_model')) document.getElementById('v-model').value = localStorage.getItem('v_model');
+            if(localStorage.getItem('v_year')) document.getElementById('v-year').value = localStorage.getItem('v_year');
+            if(localStorage.getItem('v_plate')) document.getElementById('v-plate').value = localStorage.getItem('v_plate');
+            if(localStorage.getItem('v_insurer')) document.getElementById('v-insurer').value = localStorage.getItem('v_insurer');
+            if(localStorage.getItem('v_ins_expiry')) {
+                const insExp = localStorage.getItem('v_ins_expiry');
+                document.getElementById('v-ins-expiry').value = insExp;
+                document.getElementById('insExpiryBadge').innerText = `⏳ Ins. Expires: ${insExp}`;
+            }
+
+            if(localStorage.getItem('b_bank')) document.getElementById('b-bank').value = localStorage.getItem('b_bank');
+            if(localStorage.getItem('b_routing')) document.getElementById('b-routing').value = localStorage.getItem('b_routing');
+            if(localStorage.getItem('b_account')) document.getElementById('b-account').value = localStorage.getItem('b_account');
+            
+            const savedLicense = localStorage.getItem('driver_license_img');
+            const savedExpiry = localStorage.getItem('driver_license_expiry') || '11/2028';
+            if (savedLicense) {
+                displayLicensePreview(savedLicense, savedExpiry);
+            }
+        }
+
+        async function acceptDispatch(brand, payout) {
+            showToast(`Accepted ${brand} for ${payout}! Synced.`);
+            let currentPayout = parseFloat(document.getElementById('stat-payout').innerText.replace('$', '')) || 0;
+            let newPayout = currentPayout + parseFloat(payout.replace('$', ''));
+            document.getElementById('stat-payout').innerText = '$' + newPayout.toFixed(2);
+            localStorage.setItem('omni_total_payout', newPayout);
+            updateEarningsProgress(newPayout);
+            let completed = parseInt(document.getElementById('stat-completed').innerText) + 1;
+            document.getElementById('stat-completed').innerText = completed;
+            localStorage.setItem('omni_completed_count', completed);
+            document.getElementById('sync-time').innerText = 'Just now';
+        }
+
+        function submitMerchantRequest() {
+            const name = document.getElementById('m-name').value;
+            const payout = document.getElementById('m-payout').value;
+            if(!name || !payout) {
+                alert('Please fill out business name and payout amount.');
+                return;
+            }
+            showToast('Merchant request submitted to Google Sheets!');
+            document.getElementById('m-name').value = '';
+            document.getElementById('m-payout').value = '';
+            document.getElementById('m-dest').value = '';
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg;
+            toast.classList.add('show');
+            setTimeout(() => { toast.classList.remove('show'); }, 2500);
+        }
+
+        function updateEarningsProgress(payoutAmount) {
+            const percentage = Math.min(Math.round((payoutAmount / DAILY_TARGET) * 100), 100);
+            document.getElementById('goal-progress-bar').style.width = percentage + '%';
+            document.getElementById('goal-percentage').innerText = percentage + '%';
+            document.getElementById('current-earned-label').innerText = `$${payoutAmount.toFixed(2)} Earned`;
+            document.getElementById('goal-progress-bar').style.background = payoutAmount >= DAILY_TARGET ? 'var(--accent-green)' : 'linear-gradient(90deg, var(--accent-blue), var(--accent-green))';
+        }
+
+        function resetShift() {
+            if(!confirm('Reset your shift totals and start fresh?')) return;
+            localStorage.removeItem('omni_total_payout');
+            localStorage.removeItem('omni_completed_count');
+            document.getElementById('stat-payout').innerText = '$0.00';
+            document.getElementById('stat-completed').innerText = '0';
+            updateEarningsProgress(0);
+            showToast('Shift reset successfully!');
+        }
+    </script>
+</body>
+</html>
